@@ -173,6 +173,7 @@
 	- 400 StatusBadRequst
 	- 500 StatusInternalServerError
 * API server ควรจะรองรับ Graceful shutdown
+* โปรเจคควรรองรับการ build ด้วย docker โดยใช้ multi-stage build เพื่อสะดวกต่อการ deploy
 * มีการเขียน unit test, integration test
 	- สำหรับ integration test สามารถเทคนิค docker-compose testing sandbox ที่เรียนในรายวิชา devops สำหรับรัน postgres ได้เพื่อการทดสอบ
 * ซอร์สโค้ดควรจัดรูปแบบด้วย gofmt
