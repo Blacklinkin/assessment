@@ -6,7 +6,7 @@
 * *NEED* to create table named `expenses` when start the application if not exist
 * *MUST* use go module `go mod init github.com/<your github name>/assessment`
 * *MUST* use go 1.18 or above
-* *MUST* use port `:2565` for api server (should get from environment variable name `PORT`)
+* api port *MUST* get from environment variable name `PORT` (should be able to config for api start from port `:2565`)
 * database url *MUST* get from environment variable name `DATABASE_URL`
 
 ## Business Requirements
