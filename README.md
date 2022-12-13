@@ -172,6 +172,7 @@
 * กรณี error ต่างๆ ให้ระบบ response status code ตามความเหมาะสม เช่น
 	- 400 StatusBadRequst
 	- 500 StatusInternalServerError
+* API server ควรจะรองรับ Graceful shutdown
 * มีการเขียน unit test, integration test
 	- สำหรับ integration test สามารถเทคนิค docker-compose testing sandbox ที่เรียนในรายวิชา devops สำหรับรัน postgres ได้เพื่อการทดสอบ
 * ซอร์สโค้ดควรจัดรูปแบบด้วย gofmt
