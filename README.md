@@ -165,7 +165,7 @@
 
 ## Acceptance Guidelines
 * Postman collection สำหรับทดสอบ API ทั้งหมดรันผ่าน
-	- อย่าลืมสร้าง postman environment สำหรับเก็บค่าตัวแปรเวลารัน Postman
+	- หลังจาก import [postman collection](expenses.postman_collection.json) แล้ว อย่าลืมสร้าง postman environment สำหรับเก็บค่าตัวแปรเวลารัน Postman
 * กรณี success ต้อง response status code ให้เหมาะสม เช่น
 	- 201 StatusCreated
 	- 200 StatusOK
