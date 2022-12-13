@@ -1,8 +1,9 @@
 # Prerequisites
-* กำหนดให้ส่งลิ้งค์ github repository ที่เก็บโค้ดของคุณ `https://github.com/<your github name>/assessment`
+* โปรเจคตั้งต้นคือ[โปรเจคนี้](https://github.com/KKGo-Software-engineering/assessment)
+* กำหนดให้ส่งลิ้งค์คำตอบคือ github repository ที่เก็บโค้ดของคุณ `https://github.com/<your github name>/assessment`
 * *MUST* use go module
 * *MUST* use PostgreSQL
-* *NEED* to create a database named assessment and table named expenses when start the application if not exist
+* *NEED* to create table named `expenses` when start the application if not exist
 * *MUST* use go module `go mod init github.com/<your github name>/assessment`
 * *MUST* use go 1.18 or above
 * *MUST* use port `:2565` for api server (should get from environment variable name `PORT`)
@@ -123,10 +124,11 @@
 
   - POST /expenses
   - GET /expenses/:id
-  - GET /expenses
   - PUT /expenses/:id
+  - GET /expenses
 
 ## Hints
+- ทำทีละ story โดยเริ่มจาก story แรกแล้วทำเรียงตามลำดับ
 - `os.Getenv("PORT")` ใช้เพื่อรับค่า port จาก environment variable
 - `os.Getenv("DATABASE_URL")` ใช้เพื่อรับค่า database url จาก environment variable
 - เวลารัน `DATABASE_URL=postgres://... PORT=:2565 go run server.go`
