@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Blacklinkin/assessment/maintenance"
 	"github.com/labstack/echo/v4"
 	//"github.com/labstack/echo/v4/middleware"
 )
@@ -19,6 +20,8 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hallo ,Expense tracking system")
 	})
+
+	e.GET("/health", maintenance.HealthHandler)
 
 	//Graceful shutdown
 
