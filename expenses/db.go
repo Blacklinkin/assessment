@@ -36,7 +36,6 @@ func (db *database) createDatabase() {
 	if db.err != nil {
 		log.Fatal("cant`t create table", db.err)
 	}
-
 	log.Println("Okey Database it Have Table")
 }
 
