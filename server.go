@@ -9,14 +9,19 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Blacklinkin/assessment/expenses"
 	"github.com/Blacklinkin/assessment/maintenance"
 	"github.com/labstack/echo/v4"
 	//"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
+	//Setup
+	h := expenses.Handler{}
+	h.Database.InitDatabase()
 	e := echo.New()
 
+	//Initial Path
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hallo ,Expense tracking system")
 	})
@@ -37,6 +42,7 @@ func main() {
 	<-shutdown
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer h.Database.CloseDatabase()
 	defer cancel()
 
 	if err := e.Shutdown(ctx); err != nil {
