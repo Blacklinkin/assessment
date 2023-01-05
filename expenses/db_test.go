@@ -18,5 +18,4 @@ func TestCreateDatabase(t *testing.T) {
 
 	//Assert
 	assert.Nil(t, dbt.err)
-
 }
