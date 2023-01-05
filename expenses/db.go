@@ -23,9 +23,8 @@ type database struct {
 }
 
 func (db *database) connectDatabase() {
-	url := os.Getenv("DATABASE_URL")
-	fmt.Println("address database server:", url)
-	db.DB, db.err = sql.Open("postgres", url)
+	fmt.Println("address database server:", os.Getenv("DATABASE_URL"))
+	db.DB, db.err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if db.err != nil {
 		log.Fatal("Connect to database error", db.err)
 	}
