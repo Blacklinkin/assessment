@@ -12,7 +12,7 @@ import (
 	"github.com/Blacklinkin/assessment/expenses"
 	"github.com/Blacklinkin/assessment/maintenance"
 	"github.com/labstack/echo/v4"
-	//"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -20,6 +20,10 @@ func main() {
 	h := expenses.Handler{}
 	h.Database.InitDatabase()
 	e := echo.New()
+
+	//Add Middleware of e object
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 
 	//Initial Path
 	e.GET("/", func(c echo.Context) error {
