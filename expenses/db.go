@@ -9,8 +9,16 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type DataBaseUtil interface {
+	Exec(query string, args ...any) (sql.Result, error)
+	Query(query string, args ...any) (*sql.Rows, error)
+	QueryRow(query string, args ...any) *sql.Row
+	Prepare(query string) (*sql.Stmt, error)
+	Close() error
+}
+
 type database struct {
-	DB  *sql.DB
+	DB  DataBaseUtil
 	err error
 }
 
