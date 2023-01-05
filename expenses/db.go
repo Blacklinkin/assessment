@@ -9,16 +9,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type DataBaseUtil interface {
-	Exec(query string, args ...any) (sql.Result, error)
-	Query(query string, args ...any) (*sql.Rows, error)
-	QueryRow(query string, args ...any) *sql.Row
-	Prepare(query string) (*sql.Stmt, error)
-	Close() error
-}
-
 type database struct {
-	DB  DataBaseUtil
+	DB  *sql.DB
 	err error
 }
 
@@ -31,12 +23,11 @@ func (db *database) connectDatabase() {
 }
 
 func (db *database) createDatabase() {
-	createTB := `CREATE TABLE IF NOT EXISTS expenses ( id SERIAL PRIMARY KEY, title TEXT, amount FLOAT, note TEXT, tags TEXT[] );`
+	createTB := `CREATE TABLE IF NOT EXISTS expenses ( id SERIAL PRIMARY KEY, title TEXT, amount FLOAT, note TEXT, tags TEXT[] )`
 	_, db.err = db.DB.Exec(createTB)
 	if db.err != nil {
 		log.Fatal("cant`t create table", db.err)
 	}
-
 	log.Println("Okey Database it Have Table")
 }
 
