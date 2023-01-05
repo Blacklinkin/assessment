@@ -18,7 +18,7 @@ import (
 func main() {
 	//Setup
 	h := expenses.Handler{}
-	h.Database.InitDatabase()
+	h.InitialDB()
 	e := echo.New()
 
 	//Add Middleware of e object
@@ -46,7 +46,7 @@ func main() {
 	<-shutdown
 
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer h.Database.CloseDatabase()
+	defer h.CloseDB()
 	defer cancel()
 
 	if err := e.Shutdown(ctx); err != nil {
