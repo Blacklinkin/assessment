@@ -2,6 +2,7 @@ package expenses
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -29,7 +30,8 @@ func (h *Handler) AddExpenses(c echo.Context) error {
 
 func (h *Handler) ViewExpensesByID(c echo.Context) error {
 	if id := c.Param("id"); id != "" {
-		return c.JSON(http.StatusBadRequest, h.Database.viewExpensesByID(id))
+		Id, _ := strconv.Atoi(id)
+		return c.JSON(http.StatusBadRequest, h.Database.viewExpensesDataByID(Id))
 	}
 	return c.JSON(http.StatusBadRequest, "invalid or forgot insert id")
 }

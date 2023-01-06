@@ -40,3 +40,23 @@ func TestInsertDatabese(t *testing.T) {
 	assert.Equal(t, exp.Note, result.Note)
 	assert.Equal(t, exp.Tags, result.Tags)
 }
+
+func TestViewDataByID(t *testing.T) {
+	////Arrenge
+	expWant := Expenses{ID: 1, Title: "strawberry smoothie", Amount: 79, Note: "night market promotion discount 10 bath", Tags: []string{"food", "beverage"}}
+	db, mock, _ := sqlmock.New()
+	row := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).AddRow(expWant.ID, expWant.Title, expWant.Amount, expWant.Note, pq.Array(&expWant.Tags))
+	mock.ExpectPrepare("SELECT id, title, amount, note, tags FROM expenses").ExpectQuery().WithArgs(expWant.ID).WillReturnRows(row)
+	dbt := database{DB: db}
+
+	//Act
+	result := dbt.viewExpensesDataByID(expWant.ID)
+
+	//Assert
+	assert.Nil(t, dbt.err)
+	assert.Equal(t, expWant.ID, result.ID)
+	assert.Equal(t, expWant.Title, result.Title)
+	assert.Equal(t, expWant.Amount, result.Amount)
+	assert.Equal(t, expWant.Note, result.Note)
+	assert.Equal(t, expWant.Tags, result.Tags)
+}

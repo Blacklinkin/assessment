@@ -45,8 +45,17 @@ func (db *database) insertExpenses(expenses Expenses) Expenses {
 	return resultExp
 }
 
-func (db *database) viewExpensesByID(id string) Expenses {
-	return Expenses{}
+func (db *database) viewExpensesDataByID(id int) Expenses {
+	stmt, err := db.DB.Prepare("SELECT id, title, amount, note, tags FROM expenses where id=$1")
+	db.err = err
+	if db.err != nil {
+		db.errMsg = "cant`t prepare query all users statement"
+		return Expenses{}
+	}
+	row := stmt.QueryRow(id)
+	expQ := Expenses{}
+	db.err = row.Scan(&expQ.ID, &expQ.Title, &expQ.Amount, &expQ.Note, pq.Array(&expQ.Tags))
+	return expQ
 }
 
 func (db *database) InitDatabase() {
