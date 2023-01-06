@@ -45,6 +45,10 @@ func (db *database) insertExpenses(expenses Expenses) Expenses {
 	return resultExp
 }
 
+func (db *database) viewExpensesByID(id string) Expenses {
+	return Expenses{}
+}
+
 func (db *database) InitDatabase() {
 	db.connectDatabase()
 	db.createDatabase()

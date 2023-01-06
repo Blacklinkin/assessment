@@ -21,17 +21,15 @@ func (h *Handler) CloseDB() {
 func (h *Handler) AddExpenses(c echo.Context) error {
 	exp := new(Expenses)
 	if err := c.Bind(exp); err != nil {
-		ErrMsg := Err{Message: err.Error()}
 		c.Logger().Error(err)
-		return c.JSON(http.StatusBadRequest, ErrMsg.Message)
+		return c.JSON(http.StatusBadRequest, Err{Message: err.Error()})
 	}
-	result := h.Database.insertExpenses(*exp)
-	return c.JSON(http.StatusCreated, result)
+	return c.JSON(http.StatusCreated, h.Database.insertExpenses(*exp))
 }
 
 func (h *Handler) ViewExpensesByID(c echo.Context) error {
 	if id := c.Param("id"); id != "" {
-		return nil
+		return c.JSON(http.StatusBadRequest, h.Database.viewExpensesByID(id))
 	}
-	return nil
+	return c.JSON(http.StatusBadRequest, "invalid or forgot insert id")
 }
