@@ -6,12 +6,13 @@ import (
 	"log"
 	"os"
 
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 )
 
 type database struct {
-	DB  *sql.DB
-	err error
+	DB     *sql.DB
+	err    error
+	errMsg string
 }
 
 func (db *database) connectDatabase() {
@@ -26,9 +27,22 @@ func (db *database) createDatabase() {
 	createTB := `CREATE TABLE IF NOT EXISTS expenses ( id SERIAL PRIMARY KEY, title TEXT, amount FLOAT, note TEXT, tags TEXT[] )`
 	_, db.err = db.DB.Exec(createTB)
 	if db.err != nil {
+		db.errMsg = db.err.Error()
 		log.Fatal("cant`t create table", db.err)
 	}
 	log.Println("Okey Database it Have Table")
+}
+
+func (db *database) insertExpenses(expenses Expenses) Expenses {
+	row := db.DB.QueryRow("INSERT INTO users (title, amount, note, tags) values ($1, $2, $3, $4) RETURNING id", expenses.Title, expenses.Amount, expenses.Note, pq.Array(&expenses.Tags))
+	var resultExp Expenses
+	db.err = row.Scan(&resultExp.ID, &resultExp.Title, &resultExp.Amount, &resultExp.Note, pq.Array(&resultExp.Tags))
+	if db.err != nil {
+		log.Fatal("cant`t insert data", db.err)
+		return expenses
+	}
+	fmt.Println("insert todo success id : ", resultExp.ID)
+	return resultExp
 }
 
 func (db *database) InitDatabase() {
