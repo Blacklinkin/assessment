@@ -28,3 +28,10 @@ func (h *Handler) AddExpenses(c echo.Context) error {
 	result := h.Database.insertExpenses(*exp)
 	return c.JSON(http.StatusCreated, result)
 }
+
+func (h *Handler) ViewExpensesByID(c echo.Context) error {
+	if id := c.Param("id"); id != "" {
+		return nil
+	}
+	return nil
+}

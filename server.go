@@ -33,6 +33,7 @@ func main() {
 	e.GET("/health", maintenance.HealthHandler)
 
 	e.POST("/expenses", h.AddExpenses)
+	e.GET("/expenses/:id", h.ViewExpensesByID)
 	//Graceful shutdown
 
 	go func() {
