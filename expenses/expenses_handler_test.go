@@ -1,6 +1,3 @@
-//go:build unit
-// +build unit
-
 package expenses
 
 import (
@@ -36,6 +33,7 @@ func (a *MockHandler) AddExpenses(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	a.exp.ID = 1
 	return nil
 }
 
@@ -87,7 +85,8 @@ func (a *MockHandler) ExpectedTocall(HandlerName string) {
 func TestAddExpensesHandler(t *testing.T) {
 	//Arrenge
 	expSendJSON := `{"title":"strawberry smoothie","amount":79,"note":"night market promotion discount 10 bath","tags":["food", "beverage"]}`
-	expWant := Expenses{Title: "strawberry smoothie", Amount: 79, Note: "night market promotion discount 10 bath", Tags: []string{"food", "beverage"}}
+	expWant := Expenses{ID: 1, Title: "strawberry smoothie", Amount: 79, Note: "night market promotion discount 10 bath", Tags: []string{"food", "beverage"}}
+	expWantJSON, _ := json.Marshal(expWant)
 
 	//Act
 	e := echo.New()
@@ -95,10 +94,13 @@ func TestAddExpensesHandler(t *testing.T) {
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
+	c.SetParamNames("id")
+	c.SetParamValues("1")
 	h := &MockHandler{}
 
 	h.ExpectedTocall("AddExpenses")
 	err := h.AddExpenses(c)
+	expGotJSON, _ := json.Marshal(h.exp)
 
 	// Assertions
 	t.Run("Should Call Handler AddExpenses NoError", func(t *testing.T) {
@@ -127,6 +129,10 @@ func TestAddExpensesHandler(t *testing.T) {
 		assert.Equal(t, expWant.Amount, h.exp.Amount)
 		assert.Equal(t, expWant.Note, h.exp.Note)
 		assert.Equal(t, expWant.Tags, h.exp.Tags)
+	})
+
+	t.Run("Should Be Response JSON String With POST /exoenses/1 ", func(t *testing.T) {
+		assert.Equal(t, string(expWantJSON), string(expGotJSON))
 	})
 }
 

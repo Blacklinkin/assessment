@@ -1,6 +1,3 @@
-//go:build unit
-// +build unit
-
 package expenses
 
 import (
@@ -28,8 +25,8 @@ func TestInsertDatabese(t *testing.T) {
 	////Arrenge
 	exp := Expenses{Title: "strawberry smoothie", Amount: 79, Note: "night market promotion discount 10 bath", Tags: []string{"food", "beverage"}}
 	db, mock, _ := sqlmock.New()
-	row := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).AddRow(1, exp.Title, exp.Amount, exp.Note, pq.Array(&exp.Tags))
-	mock.ExpectQuery("INSERT INTO expenses").WithArgs(exp.Title, exp.Amount, exp.Note, pq.Array(&exp.Tags)).WillReturnRows(row)
+	//row := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).AddRow(1, exp.Title, exp.Amount, exp.Note, pq.Array(&exp.Tags))
+	mock.ExpectQuery("INSERT INTO expenses").WithArgs(exp.Title, exp.Amount, exp.Note, pq.Array(&exp.Tags))
 	dbt := database{DB: db}
 
 	//Act

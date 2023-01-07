@@ -35,8 +35,8 @@ func (db *database) createDatabase() {
 
 func (db *database) insertExpenses(expenses Expenses) Expenses {
 	row := db.DB.QueryRow("INSERT INTO expenses (title, amount, note, tags) values ($1, $2, $3, $4) RETURNING id", expenses.Title, expenses.Amount, expenses.Note, pq.Array(&expenses.Tags))
-	var resultExp Expenses
-	db.err = row.Scan(&resultExp.ID, &resultExp.Title, &resultExp.Amount, &resultExp.Note, pq.Array(&resultExp.Tags))
+	resultExp := expenses
+	db.err = row.Scan(&resultExp.ID)
 	if db.err != nil {
 		log.Fatal("cant`t insert data", db.err)
 		return expenses

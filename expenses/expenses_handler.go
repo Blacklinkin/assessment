@@ -31,7 +31,7 @@ func (h *Handler) AddExpenses(c echo.Context) error {
 func (h *Handler) ViewExpensesByID(c echo.Context) error {
 	if id := c.Param("id"); id != "" {
 		Id, _ := strconv.Atoi(id)
-		return c.JSON(http.StatusBadRequest, h.Database.viewExpensesDataByID(Id))
+		return c.JSON(http.StatusOK, h.Database.viewExpensesDataByID(Id))
 	}
 	return c.JSON(http.StatusBadRequest, "invalid or forgot insert id")
 }
@@ -47,9 +47,8 @@ func (h *Handler) UpdateExpenses(c echo.Context) error {
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err.Error())
 		}
-		resultID := h.Database.updateExpensesDataBase(Id, expUpdate)
-		expUpdate.ID = resultID
-		return c.JSON(http.StatusCreated, expUpdate)
+		h.Database.updateExpensesDataBase(Id, expUpdate)
+		return c.JSON(http.StatusOK, h.Database.viewExpensesDataByID(Id))
 	}
 	return c.JSON(http.StatusBadRequest, err.Error())
 }
