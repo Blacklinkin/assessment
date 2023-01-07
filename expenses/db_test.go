@@ -71,7 +71,6 @@ func TestUpdateDataBase(t *testing.T) {
 	dataUpdated := Expenses{ID: 1, Title: "apple smoothie", Amount: 89, Note: "no discount", Tags: []string{"beverage"}}
 	db, mock, _ := sqlmock.New()
 	resultExec := sqlmock.NewResult(1, 1)
-	//row := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).AddRow(dataUpdated.ID, dataUpdated.Title, dataUpdated.Amount, dataUpdated.Note, pq.Array(&dataUpdated.Tags))
 	mock.ExpectPrepare("UPDATE expenses").ExpectExec().WithArgs(idParam, dataUpdate.Title, dataUpdate.Amount, dataUpdate.Note, pq.Array(&dataUpdate.Tags)).WillReturnResult(resultExec)
 	dbt := database{DB: db}
 
@@ -81,4 +80,26 @@ func TestUpdateDataBase(t *testing.T) {
 	//Assert
 	assert.Nil(t, dbt.err)
 	assert.Equal(t, dataUpdated.ID, resultID)
+}
+
+func TestViewAllExpenses(t *testing.T) {
+	// Arrange
+	expStrucWant := []Expenses{
+		{ID: 1, Title: "apple smoothie", Amount: 89, Note: "no discount", Tags: []string{"beverage"}},
+		{ID: 2, Title: "iPhone 14 Pro Max 1TB", Amount: 66900, Note: "birthday gift from my love", Tags: []string{"gadget"}},
+	}
+	db, mock, _ := sqlmock.New()
+	rows := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"})
+	for _, exp := range expStrucWant {
+		rows.AddRow(exp.ID, exp.Title, exp.Amount, exp.Note, pq.Array(&exp.Tags))
+	}
+	mock.ExpectQuery("SELECT id, title, amount, note, tags FROM expenses").WillReturnRows(rows)
+	dbt := database{DB: db}
+
+	// Act
+	result := dbt.viewAllExpenses()
+
+	// Assert
+	assert.Nil(t, dbt.err)
+	assert.Equal(t, expStrucWant, result)
 }
