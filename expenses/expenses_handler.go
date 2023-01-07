@@ -53,3 +53,7 @@ func (h *Handler) UpdateExpenses(c echo.Context) error {
 	}
 	return c.JSON(http.StatusBadRequest, err.Error())
 }
+
+func (h *Handler) ViewAllExpenses(c echo.Context) error {
+	return nil
+}
