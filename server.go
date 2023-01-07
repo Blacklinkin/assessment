@@ -34,6 +34,7 @@ func main() {
 
 	e.POST("/expenses", h.AddExpenses)
 	e.GET("/expenses/:id", h.ViewExpensesByID)
+	e.PUT("/expenses/:id", h.UpdateExpenses)
 	//Graceful shutdown
 
 	go func() {

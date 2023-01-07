@@ -47,15 +47,49 @@ func (db *database) insertExpenses(expenses Expenses) Expenses {
 
 func (db *database) viewExpensesDataByID(id int) Expenses {
 	stmt, err := db.DB.Prepare("SELECT id, title, amount, note, tags FROM expenses where id=$1")
+
 	db.err = err
 	if db.err != nil {
-		db.errMsg = "cant`t prepare query all users statement"
+		db.errMsg = "cant`t prepare statement"
 		return Expenses{}
 	}
+
 	row := stmt.QueryRow(id)
 	expQ := Expenses{}
 	db.err = row.Scan(&expQ.ID, &expQ.Title, &expQ.Amount, &expQ.Note, pq.Array(&expQ.Tags))
+	if db.err != nil {
+		db.errMsg = "cant`t return statement"
+		return Expenses{}
+	}
 	return expQ
+}
+
+func (db *database) updateExpensesDataBase(id int, expUpdate Expenses) int {
+	stmt, err := db.DB.Prepare("UPDATE expenses SET title=$2, amount=$3, note=$4, tags=$5 WHERE id=$1")
+
+	db.err = err
+	if db.err != nil {
+		db.errMsg = "cant`t prepare statement update"
+		return 0
+	}
+
+	resultExec, err := stmt.Exec(id, expUpdate.Title, expUpdate.Amount, expUpdate.Note, pq.Array(&expUpdate.Tags))
+
+	db.err = err
+	if db.err != nil {
+		db.errMsg = "cant`t return result update"
+		return 0
+	}
+
+	idUpdate, err := resultExec.LastInsertId()
+
+	db.err = err
+	if db.err != nil {
+		db.errMsg = "cant`t return id update"
+		return 0
+	}
+
+	return int(idUpdate)
 }
 
 func (db *database) InitDatabase() {
