@@ -20,12 +20,12 @@ func (h *Handler) CloseDB() {
 }
 
 func (h *Handler) AddExpenses(c echo.Context) error {
-	exp := new(Expenses)
-	if err := c.Bind(exp); err != nil {
+	exp := Expenses{}
+	if err := c.Bind(&exp); err != nil {
 		c.Logger().Error(err)
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
-	return c.JSON(http.StatusCreated, h.Database.insertExpenses(*exp))
+	return c.JSON(http.StatusCreated, h.Database.insertExpenses(exp))
 }
 
 func (h *Handler) ViewExpensesByID(c echo.Context) error {
@@ -55,6 +55,10 @@ func (h *Handler) UpdateExpenses(c echo.Context) error {
 }
 
 func (h *Handler) ViewAllExpenses(c echo.Context) error {
-	expSet := []Expenses{}
-	return c.JSON(http.StatusOK, expSet)
+	expSetResult := []Expenses{}
+	expSetResult = h.Database.viewAllExpenses()
+	if expSetResult == nil {
+		return c.JSON(http.StatusInternalServerError, h.Database.errMsg)
+	}
+	return c.JSON(http.StatusOK, expSetResult)
 }

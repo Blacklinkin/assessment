@@ -21,8 +21,8 @@ type HandlerUtil interface {
 
 type MockHandler struct {
 	exp           Expenses
-	expReq        Expenses
-	expSet        []Expenses
+	expReqGot     Expenses
+	expSetGot     []Expenses
 	HandlerToCall map[string]bool
 }
 
@@ -55,7 +55,7 @@ func (a *MockHandler) UpdateExpensesHandler(c echo.Context) error {
 	}
 	c.Response().Status = http.StatusCreated
 	if id := c.Param("id"); id != "" {
-		a.expReq = a.exp
+		a.expReqGot = a.exp
 		Id, _ := strconv.Atoi(id)
 		a.exp = Expenses{ID: Id, Title: a.exp.Title, Amount: a.exp.Amount, Note: a.exp.Note, Tags: a.exp.Tags}
 		return nil
@@ -66,7 +66,7 @@ func (a *MockHandler) UpdateExpensesHandler(c echo.Context) error {
 func (a *MockHandler) ViewAllExpensesHandler(c echo.Context) error {
 	a.HandlerToCall["ViewAllExpenses"] = true
 	c.Response().Status = http.StatusOK
-	a.expSet = append(a.expSet,
+	a.expSetGot = append(a.expSetGot,
 		Expenses{ID: 1, Title: "apple smoothie", Amount: 89, Note: "no discount", Tags: []string{"beverage"}},
 		Expenses{ID: 2, Title: "iPhone 14 Pro Max 1TB", Amount: 66900, Note: "birthday gift from my love", Tags: []string{"gadget"}},
 	)
@@ -223,11 +223,11 @@ func TestUpdateExpensesHandler(t *testing.T) {
 	})
 
 	t.Run("Should be Receive Expenses Struct From Request", func(t *testing.T) {
-		assert.Equal(t, strucReqBody.ID, h.expReq.ID)
-		assert.Equal(t, strucReqBody.Title, h.expReq.Title)
-		assert.Equal(t, strucReqBody.Amount, h.expReq.Amount)
-		assert.Equal(t, strucReqBody.Note, h.expReq.Note)
-		assert.Equal(t, strucReqBody.Tags, h.expReq.Tags)
+		assert.Equal(t, strucReqBody.ID, h.expReqGot.ID)
+		assert.Equal(t, strucReqBody.Title, h.expReqGot.Title)
+		assert.Equal(t, strucReqBody.Amount, h.expReqGot.Amount)
+		assert.Equal(t, strucReqBody.Note, h.expReqGot.Note)
+		assert.Equal(t, strucReqBody.Tags, h.expReqGot.Tags)
 	})
 
 	t.Run("Should Be Update Expenses Object With Put /expenses/1 Request", func(t *testing.T) {
@@ -261,7 +261,7 @@ func TestViewAllExpensesHandler(t *testing.T) {
 
 	h.ExpectedTocall("ViewAllExpenses")
 	err := h.ViewAllExpensesHandler(c)
-	expJSONSetGot, _ := json.Marshal(h.expSet)
+	expJSONSetGot, _ := json.Marshal(h.expSetGot)
 
 	// Assertions
 	t.Run("Should Call Handler ViewAllExpenses NoError", func(t *testing.T) {
@@ -285,8 +285,7 @@ func TestViewAllExpensesHandler(t *testing.T) {
 	})
 
 	t.Run("Should Be Create Expenses Object With Get /expenses Request", func(t *testing.T) {
-		assert.Equal(t, expStrucWant[0], h.expSet[0])
-		assert.Equal(t, expStrucWant[1], h.expSet[1])
+		assert.Equal(t, expStrucWant, h.expSetGot)
 	})
 
 	t.Run("Should Be Response JSON String With Get /expenses Request", func(t *testing.T) {

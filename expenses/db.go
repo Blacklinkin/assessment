@@ -92,6 +92,29 @@ func (db *database) updateExpensesDataBase(id int, expUpdate Expenses) int {
 	return int(idUpdate)
 }
 
+func (db *database) viewAllExpenses() []Expenses {
+	rows, err := db.DB.Query("SELECT id, title, amount, note, tags FROM expenses")
+	db.err = err
+	if db.err != nil {
+		db.errMsg = "Error querying expenses"
+		return []Expenses{}
+	}
+	defer rows.Close()
+
+	expSet := []Expenses{}
+	for rows.Next() {
+		var exp Expenses
+		err := rows.Scan(&exp.ID, &exp.Title, &exp.Amount, &exp.Note, pq.Array(&exp.Tags))
+		db.err = err
+		if err != nil {
+			db.errMsg = "Error scanning row"
+			return []Expenses{}
+		}
+		expSet = append(expSet, exp)
+	}
+	return expSet
+}
+
 func (db *database) InitDatabase() {
 	db.connectDatabase()
 	db.createDatabase()
