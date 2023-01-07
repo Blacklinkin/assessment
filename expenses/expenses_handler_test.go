@@ -16,11 +16,13 @@ type HandlerUtil interface {
 	AddExpenses(c echo.Context) error
 	ViewExpensesByID(c echo.Context) error
 	UpdateExpensesHandler(c echo.Context) error
+	ViewAllExpensesHandler(c echo.Context) error
 }
 
 type MockHandler struct {
 	exp           Expenses
 	expReq        Expenses
+	expSet        []Expenses
 	HandlerToCall map[string]bool
 }
 
@@ -59,6 +61,16 @@ func (a *MockHandler) UpdateExpensesHandler(c echo.Context) error {
 		return nil
 	}
 	return echo.ErrBadRequest
+}
+
+func (a *MockHandler) ViewAllExpensesHandler(c echo.Context) error {
+	a.HandlerToCall["ViewAllExpenses"] = true
+	c.Response().Status = http.StatusOK
+	a.expSet = append(a.expSet,
+		Expenses{ID: 1, Title: "apple smoothie", Amount: 89, Note: "no discount", Tags: []string{"beverage"}},
+		Expenses{ID: 2, Title: "iPhone 14 Pro Max 1TB", Amount: 66900, Note: "birthday gift from my love", Tags: []string{"gadget"}},
+	)
+	return nil
 }
 
 func (a *MockHandler) ExpectedTocall(HandlerName string) {
@@ -228,5 +240,56 @@ func TestUpdateExpensesHandler(t *testing.T) {
 
 	t.Run("Should Be Response JSON String With Put /exoenses/1 ", func(t *testing.T) {
 		assert.Equal(t, string(resBody), string(expJSON))
+	})
+}
+
+func TestViewAllExpensesHandler(t *testing.T) {
+	//Arrenge
+	expStrucWant := []Expenses{
+		{ID: 1, Title: "apple smoothie", Amount: 89, Note: "no discount", Tags: []string{"beverage"}},
+		{ID: 2, Title: "iPhone 14 Pro Max 1TB", Amount: 66900, Note: "birthday gift from my love", Tags: []string{"gadget"}},
+	}
+	expJSONSetWant, _ := json.Marshal(expStrucWant)
+
+	//Act
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/expenses", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	h := &MockHandler{}
+
+	h.ExpectedTocall("ViewAllExpenses")
+	err := h.ViewAllExpensesHandler(c)
+	expJSONSetGot, _ := json.Marshal(h.expSet)
+
+	// Assertions
+	t.Run("Should Call Handler ViewAllExpenses NoError", func(t *testing.T) {
+		assert.NoError(t, err)
+	})
+
+	t.Run("Should Call Be Right Path /expense", func(t *testing.T) {
+		assert.Equal(t, "/expenses", req.URL.Path)
+	})
+
+	t.Run("Should Call Be Right Method Get", func(t *testing.T) {
+		assert.Equal(t, http.MethodGet, req.Method)
+	})
+
+	t.Run("Should Call Be Right Handler ViewAllExpenses", func(t *testing.T) {
+		assert.Equal(t, true, h.HandlerToCall["ViewAllExpenses"])
+	})
+
+	t.Run("Should Be Response Right HTTPCode", func(t *testing.T) {
+		assert.Equal(t, http.StatusOK, c.Response().Status)
+	})
+
+	t.Run("Should Be Create Expenses Object With Get /expenses Request", func(t *testing.T) {
+		assert.Equal(t, expStrucWant[0], h.expSet[0])
+		assert.Equal(t, expStrucWant[1], h.expSet[1])
+	})
+
+	t.Run("Should Be Response JSON String With Get /expenses Request", func(t *testing.T) {
+		assert.Equal(t, string(expJSONSetWant), string(expJSONSetGot))
 	})
 }
