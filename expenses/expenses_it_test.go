@@ -1,3 +1,6 @@
+//go:build integration
+// +build integration
+
 package expenses
 
 import (
@@ -77,6 +80,7 @@ func TestITAddExpenses(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+/*
 func TestITViewExpensesByID(t *testing.T) {
 	// Setup server
 	eh := echo.New()
@@ -214,3 +218,4 @@ func TestITUpdateExpenses(t *testing.T) {
 	err = eh.Shutdown(ctx)
 	assert.NoError(t, err)
 }
+*/

@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Blacklinkin/assessment/authorization"
 	"github.com/Blacklinkin/assessment/expenses"
 	"github.com/Blacklinkin/assessment/maintenance"
 	"github.com/labstack/echo/v4"
@@ -24,6 +25,7 @@ func main() {
 	//Add Middleware of e object
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(authorization.AuthHeader)
 
 	//Initial Path
 	e.GET("/", func(c echo.Context) error {
