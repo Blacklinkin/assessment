@@ -1,3 +1,6 @@
+//go:build integration
+// +build integration
+
 package expenses
 
 import (
@@ -167,7 +170,7 @@ func TestITUpdateExpenses(t *testing.T) {
 
 	resp.Body.Close()
 
-	// Arrange:SetData
+	// Arrange:SetUpdateData
 	ParamUpdateID := resultStructGot.ID
 	expSendUpdateJSON := `{"title": "apple smoothie","amount": 89,"note": "no discount","tags": ["beverage"]}`
 	expStructUpdateWant := Expenses{ID: 1, Title: "apple smoothie", Amount: 89, Note: "no discount", Tags: []string{"beverage"}}
@@ -200,5 +203,65 @@ func TestITUpdateExpenses(t *testing.T) {
 	}
 
 	// ShutdownServer
+	shutdownServer(eh, t)
+}
+
+func TestITViewAllExpenses(t *testing.T) {
+	// Setup server
+	eh := initialServer()
+
+	// Arrange:SetData
+	expSendJSON := []string{`{"title": "apple smoothie","amount": 89,"note": "no discount","tags": ["beverage"]}`, `{"title": "iPhone 14 Pro Max 1TB","amount": 66900,"note": "birthday gift from my love", "tags": ["gadget"]}`}
+
+	byteBodyGot := []byte{}
+	resultStructGot := []Expenses{}
+
+	for _, i := range expSendJSON {
+		// Arrange:SetRequest
+		req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://localhost:%d/expenses", serverPort), strings.NewReader(i))
+		assert.NoError(t, err)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		client := http.Client{}
+
+		// Act:Response
+		resp, err := client.Do(req)
+		assert.NoError(t, err)
+
+		byteBodyGoti, err := ioutil.ReadAll(resp.Body)
+		assert.NoError(t, err)
+		byteBodyGot = append(byteBodyGot, byteBodyGoti...)
+
+		resultStructGoti := Expenses{}
+		json.Unmarshal(byteBodyGot, &resultStructGoti)
+		resultStructGot = append(resultStructGot, resultStructGoti)
+
+		resp.Body.Close()
+
+	}
+
+	// Arrange:Request
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:%d/expenses", serverPort), nil)
+	assert.NoError(t, err)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	client := http.Client{}
+
+	// Act:ResponseByID
+	resp, err := client.Do(req)
+	assert.NoError(t, err)
+
+	byteBodyGotAll, _ := ioutil.ReadAll(resp.Body)
+
+	resultStructGotAll := []Expenses{}
+	json.Unmarshal(byteBodyGotAll, &resultStructGotAll)
+
+	resp.Body.Close()
+
+	// Assertions
+	if assert.NoError(t, err) {
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		assert.Greater(t, len(resultStructGotAll), len(resultStructGot))
+	}
+
+	//ShutdownServer
 	shutdownServer(eh, t)
 }
