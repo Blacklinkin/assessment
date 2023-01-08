@@ -1,6 +1,3 @@
-//go:build unit
-// +build unit
-
 package expenses
 
 import (
@@ -71,7 +68,6 @@ func TestUpdateDataBase(t *testing.T) {
 	////Arrenge
 	idParam := 1
 	dataUpdate := Expenses{Title: "apple smoothie", Amount: 89, Note: "no discount", Tags: []string{"beverage"}}
-	dataUpdated := Expenses{ID: 1, Title: "apple smoothie", Amount: 89, Note: "no discount", Tags: []string{"beverage"}}
 	db, mock, _ := sqlmock.New()
 	resultExec := sqlmock.NewResult(1, 1)
 	mock.ExpectPrepare("UPDATE expenses").ExpectExec().WithArgs(idParam, dataUpdate.Title, dataUpdate.Amount, dataUpdate.Note, pq.Array(&dataUpdate.Tags)).WillReturnResult(resultExec)
