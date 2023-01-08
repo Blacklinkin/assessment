@@ -64,7 +64,6 @@ func TestITAddExpenses(t *testing.T) {
 	expSendJSON := `{"title":"strawberry smoothie","amount":79,"note":"night market promotion discount 10 bath","tags":["food", "beverage"]}`
 	expWant := Expenses{Title: "strawberry smoothie", Amount: 79, Note: "night market promotion discount 10 bath", Tags: []string{"food", "beverage"}}
 	expWantJSON, _ := json.Marshal(expWant)
-	// Arrange:SetRequest
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://localhost:%d/expenses", serverPort), strings.NewReader(expSendJSON))
 	assert.NoError(t, err)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
