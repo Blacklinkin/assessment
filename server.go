@@ -29,7 +29,7 @@ func main() {
 
 	//Initial Path
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hallo ,Expense tracking system")
+		return c.String(http.StatusOK, "Hallo ,Expense Tracking System v1.0.0")
 	})
 
 	e.GET("/health", maintenance.HealthHandler)
