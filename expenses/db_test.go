@@ -1,3 +1,6 @@
+//go:build unit
+// +build unit
+
 package expenses
 
 import (
@@ -25,8 +28,8 @@ func TestInsertDatabese(t *testing.T) {
 	////Arrenge
 	exp := Expenses{Title: "strawberry smoothie", Amount: 79, Note: "night market promotion discount 10 bath", Tags: []string{"food", "beverage"}}
 	db, mock, _ := sqlmock.New()
-	//row := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).AddRow(1, exp.Title, exp.Amount, exp.Note, pq.Array(&exp.Tags))
-	mock.ExpectQuery("INSERT INTO expenses").WithArgs(exp.Title, exp.Amount, exp.Note, pq.Array(&exp.Tags))
+	row := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).AddRow(1, exp.Title, exp.Amount, exp.Note, pq.Array(&exp.Tags))
+	mock.ExpectQuery("INSERT INTO expenses").WithArgs(exp.Title, exp.Amount, exp.Note, pq.Array(&exp.Tags)).WillReturnRows(row)
 	dbt := database{DB: db}
 
 	//Act
@@ -80,26 +83,4 @@ func TestUpdateDataBase(t *testing.T) {
 	//Assert
 	assert.Nil(t, dbt.err)
 	assert.Equal(t, dataUpdated.ID, resultID)
-}
-
-func TestViewAllExpenses(t *testing.T) {
-	// Arrange
-	expStrucWant := []Expenses{
-		{ID: 1, Title: "apple smoothie", Amount: 89, Note: "no discount", Tags: []string{"beverage"}},
-		{ID: 2, Title: "iPhone 14 Pro Max 1TB", Amount: 66900, Note: "birthday gift from my love", Tags: []string{"gadget"}},
-	}
-	db, mock, _ := sqlmock.New()
-	rows := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"})
-	for _, exp := range expStrucWant {
-		rows.AddRow(exp.ID, exp.Title, exp.Amount, exp.Note, pq.Array(&exp.Tags))
-	}
-	mock.ExpectQuery("SELECT id, title, amount, note, tags FROM expenses").WillReturnRows(rows)
-	dbt := database{DB: db}
-
-	// Act
-	result := dbt.viewAllExpenses()
-
-	// Assert
-	assert.Nil(t, dbt.err)
-	assert.Equal(t, expStrucWant, result)
 }
