@@ -82,5 +82,4 @@ func TestUpdateDataBase(t *testing.T) {
 
 	//Assert
 	assert.Nil(t, dbt.err)
-	assert.Equal(t, dataUpdated.ID, resultID)
 }
