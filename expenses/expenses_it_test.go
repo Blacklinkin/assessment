@@ -21,17 +21,21 @@ import (
 
 const serverPort = 80
 
-func TestITAddExpenses(t *testing.T) {
-	// Setup server
-	eh := echo.New()
+func initialServer() (eh *echo.Echo) {
+	eh = echo.New()
 	go func(e *echo.Echo) {
 		h := Handler{}
 		h.InitialDB()
 
 		e.POST("/expenses", h.AddExpenses)
+		e.GET("/expenses/:id", h.ViewExpensesByID)
+		e.PUT("/expenses/:id", h.UpdateExpenses)
+		e.GET("/expenses", h.ViewAllExpenses)
+
 		e.Start(fmt.Sprintf(":%d", serverPort))
 		h.CloseDB()
 	}(eh)
+
 	for {
 		conn, err := net.DialTimeout("tcp", fmt.Sprintf("localhost:%d", serverPort), 30*time.Second)
 		if err != nil {
@@ -42,11 +46,25 @@ func TestITAddExpenses(t *testing.T) {
 			break
 		}
 	}
+	return
+}
 
-	// Arrange
+func shutdownServer(eh *echo.Echo, t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	errShutDown := eh.Shutdown(ctx)
+	assert.NoError(t, errShutDown)
+}
+
+func TestITAddExpenses(t *testing.T) {
+	// Setup server
+	eh := initialServer()
+
+	// Arrange:SetData
 	expSendJSON := `{"title":"strawberry smoothie","amount":79,"note":"night market promotion discount 10 bath","tags":["food", "beverage"]}`
 	expWant := Expenses{Title: "strawberry smoothie", Amount: 79, Note: "night market promotion discount 10 bath", Tags: []string{"food", "beverage"}}
 	expWantJSON, _ := json.Marshal(expWant)
+	//Arrange:SetRequest
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://localhost:%d/expenses", serverPort), strings.NewReader(expSendJSON))
 	assert.NoError(t, err)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -56,28 +74,26 @@ func TestITAddExpenses(t *testing.T) {
 	resp, err := client.Do(req)
 	assert.NoError(t, err)
 
-	byteBody, err := ioutil.ReadAll(resp.Body)
+	byteBodyGot, err := ioutil.ReadAll(resp.Body)
 	assert.NoError(t, err)
 
-	resultStruc := Expenses{}
-	json.Unmarshal(byteBody, &resultStruc)
+	resultStructGot := Expenses{}
+	json.Unmarshal(byteBodyGot, &resultStructGot)
 
 	resp.Body.Close()
 
 	// Assertions
 	if assert.NoError(t, err) {
 		assert.Equal(t, http.StatusCreated, resp.StatusCode)
-		assert.NotEqual(t, expWantJSON, byteBody)
-		assert.Equal(t, expWant.Title, resultStruc.Title)
-		assert.Equal(t, expWant.Amount, resultStruc.Amount)
-		assert.Equal(t, expWant.Note, resultStruc.Note)
-		assert.Equal(t, expWant.Tags, resultStruc.Tags)
+		assert.NotEqual(t, expWantJSON, byteBodyGot)
+		assert.Equal(t, expWant.Title, resultStructGot.Title)
+		assert.Equal(t, expWant.Amount, resultStructGot.Amount)
+		assert.Equal(t, expWant.Note, resultStructGot.Note)
+		assert.Equal(t, expWant.Tags, resultStructGot.Tags)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	err = eh.Shutdown(ctx)
-	assert.NoError(t, err)
+	//ShutdownServer
+	shutdownServer(eh, t)
 }
 
 /*
