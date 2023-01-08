@@ -78,7 +78,7 @@ func TestUpdateDataBase(t *testing.T) {
 	dbt := database{DB: db}
 
 	//Act
-	resultID := dbt.updateExpensesDataBase(idParam, dataUpdate)
+	dbt.updateExpensesDataBase(idParam, dataUpdate)
 
 	//Assert
 	assert.Nil(t, dbt.err)
