@@ -2,7 +2,6 @@ package expenses
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 
@@ -16,7 +15,7 @@ type database struct {
 }
 
 func (db *database) connectDatabase() {
-	fmt.Println("address database server:", os.Getenv("DATABASE_URL"))
+	log.Println("address database server:", os.Getenv("DATABASE_URL"))
 	db.DB, db.err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if db.err != nil {
 		log.Fatal("Connect to database error", db.err)
@@ -41,7 +40,7 @@ func (db *database) insertExpenses(expenses Expenses) Expenses {
 		log.Fatal("cant`t insert data", db.err)
 		return expenses
 	}
-	fmt.Println("insert todo success id : ", resultExp.ID)
+	log.Println("insert todo success id : ", resultExp.ID)
 	return resultExp
 }
 
@@ -51,6 +50,7 @@ func (db *database) viewExpensesDataByID(id int) Expenses {
 	db.err = err
 	if db.err != nil {
 		db.errMsg = "cant`t prepare statement"
+		log.Fatal(db.errMsg)
 		return Expenses{}
 	}
 
@@ -59,8 +59,10 @@ func (db *database) viewExpensesDataByID(id int) Expenses {
 	db.err = row.Scan(&expQ.ID, &expQ.Title, &expQ.Amount, &expQ.Note, pq.Array(&expQ.Tags))
 	if db.err != nil {
 		db.errMsg = "cant`t return statement"
+		log.Fatal(db.errMsg)
 		return Expenses{}
 	}
+	log.Println("view by id todo success: ", expQ)
 	return expQ
 }
 
@@ -70,6 +72,7 @@ func (db *database) updateExpensesDataBase(id int, expUpdate Expenses) int {
 	db.err = err
 	if db.err != nil {
 		db.errMsg = "cant`t prepare statement update"
+		log.Fatal(db.errMsg)
 		return 0
 	}
 
@@ -78,6 +81,7 @@ func (db *database) updateExpensesDataBase(id int, expUpdate Expenses) int {
 	db.err = err
 	if db.err != nil {
 		db.errMsg = "cant`t return result update"
+		log.Fatal(db.errMsg)
 		return 0
 	}
 
@@ -86,9 +90,10 @@ func (db *database) updateExpensesDataBase(id int, expUpdate Expenses) int {
 	db.err = err
 	if db.err != nil {
 		db.errMsg = "cant`t return id update"
+		log.Fatal(db.errMsg)
 		return 0
 	}
-
+	log.Println("update todo success id : ", int(idUpdate))
 	return int(idUpdate)
 }
 
@@ -97,6 +102,7 @@ func (db *database) viewAllExpenses() []Expenses {
 	db.err = err
 	if db.err != nil {
 		db.errMsg = "Error querying expenses"
+		log.Fatal(db.errMsg)
 		return []Expenses{}
 	}
 	defer rows.Close()
@@ -108,10 +114,13 @@ func (db *database) viewAllExpenses() []Expenses {
 		db.err = err
 		if err != nil {
 			db.errMsg = "Error scanning row"
+			log.Fatal(db.errMsg)
 			return []Expenses{}
 		}
+		log.Println("add expenses todo success: ", exp)
 		expSet = append(expSet, exp)
 	}
+	log.Println("view all todo success: ", expSet)
 	return expSet
 }
 
