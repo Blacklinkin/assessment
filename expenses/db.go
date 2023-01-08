@@ -66,35 +66,24 @@ func (db *database) viewExpensesDataByID(id int) Expenses {
 	return expQ
 }
 
-func (db *database) updateExpensesDataBase(id int, expUpdate Expenses) int {
+func (db *database) updateExpensesDataBase(id int, expUpdate Expenses) {
 	stmt, err := db.DB.Prepare("UPDATE expenses SET title=$2, amount=$3, note=$4, tags=$5 WHERE id=$1")
 
 	db.err = err
 	if db.err != nil {
 		db.errMsg = "cant`t prepare statement update"
 		log.Fatal(db.errMsg)
-		return 0
 	}
 
-	resultExec, err := stmt.Exec(id, expUpdate.Title, expUpdate.Amount, expUpdate.Note, pq.Array(&expUpdate.Tags))
+	_, err = stmt.Exec(id, expUpdate.Title, expUpdate.Amount, expUpdate.Note, pq.Array(&expUpdate.Tags))
 
 	db.err = err
 	if db.err != nil {
 		db.errMsg = "cant`t return result update"
 		log.Fatal(db.errMsg)
-		return 0
 	}
 
-	idUpdate, err := resultExec.LastInsertId()
-
-	db.err = err
-	if db.err != nil {
-		db.errMsg = "cant`t return id update"
-		log.Fatal(db.errMsg)
-		return 0
-	}
-	log.Println("update todo success id : ", int(idUpdate))
-	return int(idUpdate)
+	log.Println("update todo success id : ", id)
 }
 
 func (db *database) viewAllExpenses() []Expenses {

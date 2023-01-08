@@ -1,6 +1,3 @@
-//go:build integration
-// +build integration
-
 package expenses
 
 import (
@@ -143,12 +140,65 @@ func TestITViewExpensesByID(t *testing.T) {
 		assert.Equal(t, resultStructGot, resultStructGotByID)
 	}
 
-	//ShutdownServer
+	// ShutdownServer
 	shutdownServer(eh, t)
 }
 
-/*
 func TestITUpdateExpenses(t *testing.T) {
-	return
+	// Setup server
+	eh := initialServer()
+
+	// Arrange:SetData
+	expSendJSON := `{"title":"strawberry smoothie","amount":79,"note":"night market promotion discount 10 bath","tags":["food", "beverage"]}`
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://localhost:%d/expenses", serverPort), strings.NewReader(expSendJSON))
+	assert.NoError(t, err)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	client := http.Client{}
+
+	// Act
+	resp, err := client.Do(req)
+	assert.NoError(t, err)
+
+	byteBodyGot, err := ioutil.ReadAll(resp.Body)
+	assert.NoError(t, err)
+
+	resultStructGot := Expenses{}
+	json.Unmarshal(byteBodyGot, &resultStructGot)
+
+	resp.Body.Close()
+
+	// Arrange:SetData
+	ParamUpdateID := resultStructGot.ID
+	expSendUpdateJSON := `{"title": "apple smoothie","amount": 89,"note": "no discount","tags": ["beverage"]}`
+	expStructUpdateWant := Expenses{ID: 1, Title: "apple smoothie", Amount: 89, Note: "no discount", Tags: []string{"beverage"}}
+	expUpdateWantJSON, _ := json.Marshal(expStructUpdateWant)
+	req, err = http.NewRequest(http.MethodPut, fmt.Sprintf("http://localhost:%d/expenses/%d", serverPort, ParamUpdateID), strings.NewReader(expSendUpdateJSON))
+	assert.NoError(t, err)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	client = http.Client{}
+
+	// Act
+	resp, err = client.Do(req)
+	assert.NoError(t, err)
+
+	byteBodyUpdateGot, err := ioutil.ReadAll(resp.Body)
+	assert.NoError(t, err)
+
+	resultStructUpdateGot := Expenses{}
+	json.Unmarshal(byteBodyUpdateGot, &resultStructUpdateGot)
+
+	resp.Body.Close()
+
+	// Assertions
+	if assert.NoError(t, err) {
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+		assert.NotEqual(t, expUpdateWantJSON, byteBodyUpdateGot)
+		assert.Equal(t, expStructUpdateWant.Title, resultStructUpdateGot.Title)
+		assert.Equal(t, expStructUpdateWant.Amount, resultStructUpdateGot.Amount)
+		assert.Equal(t, expStructUpdateWant.Note, resultStructUpdateGot.Note)
+		assert.Equal(t, expStructUpdateWant.Tags, resultStructUpdateGot.Tags)
+	}
+
+	// ShutdownServer
+	shutdownServer(eh, t)
 }
-*/
