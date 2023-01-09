@@ -1,0 +1,49 @@
+name: CI and CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # ==============
+  # CI task
+  # ==============
+  build-and-push-docker-image:
+    name: Build Docker image and push to repositories
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup SHA
+        run: echo "GITHUB_SHA=${GITHUB_SHA}" >> $GITHUB_ENV
+      
+      - name: Build the Docker image
+        run: docker build . --file Dockerfile --tag ghcr.io/blacklinkin/assessment:${{ env.GITHUB_SHA }}
+        
+      - name: Integration test inside Docker-compose cleanup
+        run: docker-compose -f docker-compose.test.yml down
+    
+      - name: Integration test inside Docker-compose
+        run: docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from it_tests
+
+      - name: Login ghcr.io
+        uses: docker/login-action@v1.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          logout: true
+      
+      - name: Push to GitHub Container Registry
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          tags: |
+            ghcr.io/blacklinkin/assessment:${{ env.GITHUB_SHA }}
+          # build on feature branches, push only on main branch
+          push: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}

@@ -6,12 +6,12 @@ networks:
 services:
   it_tests:
     environment: 
-      - DATABASE_URL=postgresql://root:root@db/go-expenses-db?sslmode=disable
+      DATABASE_URL: postgresql://root:root@db/go-expenses-db?sslmode=disable
     build:
       context: .
       dockerfile: ./Dockerfile.test
     volumes:
-      - \$PWD\:/go/src/target
+      - .:/go/src/target
     depends_on:
       - db
     networks:
